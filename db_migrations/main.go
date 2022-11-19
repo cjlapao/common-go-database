@@ -2,7 +2,6 @@ package db_migrations
 
 import (
 	"context"
-	"fmt"
 	"strings"
 	"time"
 
@@ -47,7 +46,7 @@ func NewMigrationService(repo MigrationsRepository) *SqlMigrationService {
 func (m *SqlMigrationService) WasApplied(name string) bool {
 	for _, migration := range m.AppliedMigrations {
 		if strings.EqualFold(name, migration.Name) {
-			m.logger.Info("Migration %v was already applied on %v", migration.Name, fmt.Sprintf("%d", migration.ExecutedOn))
+			m.logger.Info("Migration %v was already applied on %v", migration.Name, migration.ExecutedOn.Format(time.RFC3339))
 			return true
 		}
 	}
