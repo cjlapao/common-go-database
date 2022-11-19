@@ -69,7 +69,7 @@ func (m *SqlMigrationService) Run() error {
 
 	for el := m.Migrations.Front(); el != nil; el = el.Next() {
 		migration := MigrationEntity{
-			Name:   el.Value.Name(),
+			Name:   strings.ReplaceAll(el.Value.Name(), " ", "_"),
 			Status: false,
 		}
 		if m.WasApplied(el.Value.Name()) {
@@ -81,6 +81,8 @@ func (m *SqlMigrationService) Run() error {
 			if !el.Value.Down() {
 				logger.Error("there was an error applying migration down for %v, database might be inconsistent", el.Value.Name())
 			}
+			// Stopping migrations as they need to be run in order
+			break
 		} else {
 			logger.Info("Migration %v was applied successfully", el.Value.Name())
 			migration.Status = true
