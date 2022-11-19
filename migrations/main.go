@@ -1,4 +1,4 @@
-package db_migrations
+package migrations
 
 import (
 	"context"

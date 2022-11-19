@@ -1,4 +1,11 @@
-package db_migrations
+package migrations
+
+type Migration interface {
+	Name() string
+	Order() int
+	Up() bool
+	Down() bool
+}
 
 type MigrationsRepository interface {
 	CreateTable() error
