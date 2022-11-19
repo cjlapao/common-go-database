@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/cjlapao/common-go-database/db_migrations"
+	"github.com/cjlapao/common-go-database/migrations"
 	"github.com/cjlapao/common-go/log"
 	"github.com/google/uuid"
 )
@@ -36,7 +36,7 @@ func (m *SqlMigrationsRepo) CreateTable() error {
 	defer globalDb.Close()
 
 	_, err := globalDb.ExecContext(`
-  CREATE TABLE IF NOT EXISTS ` + db_migrations.MIGRATION_TABLE_NAME + `(  
+  CREATE TABLE IF NOT EXISTS ` + migrations.MIGRATION_TABLE_NAME + `(  
     id CHAR(36) NOT NULL PRIMARY KEY COMMENT 'Primary Key',
     executed_on DATETIME COMMENT 'Time of execution',
     name CHAR(150) NOT NULL COMMENT 'Migration Name',
@@ -53,8 +53,8 @@ func (m *SqlMigrationsRepo) CreateTable() error {
 	return nil
 }
 
-func (m *SqlMigrationsRepo) GetAppliedMigrations() ([]db_migrations.MigrationEntity, error) {
-	var queryResult []db_migrations.MigrationEntity
+func (m *SqlMigrationsRepo) GetAppliedMigrations() ([]migrations.MigrationEntity, error) {
+	var queryResult []migrations.MigrationEntity
 	globalDb := m.database.Connect()
 
 	defer globalDb.Close()
@@ -63,7 +63,7 @@ func (m *SqlMigrationsRepo) GetAppliedMigrations() ([]db_migrations.MigrationEnt
 SELECT 
   * 
 FROM 
-  ` + db_migrations.MIGRATION_TABLE_NAME + `
+  ` + migrations.MIGRATION_TABLE_NAME + `
 WHERE 
   status = TRUE
 ORDER BY 
@@ -74,10 +74,10 @@ ORDER BY
 		return nil, err
 	}
 
-	queryResult = make([]db_migrations.MigrationEntity, 0)
+	queryResult = make([]migrations.MigrationEntity, 0)
 
 	for result.Next() {
-		var migration db_migrations.MigrationEntity
+		var migration migrations.MigrationEntity
 
 		err := result.Scan(&migration.ID, &migration.ExecutedOn, &migration.Name, &migration.Status)
 
@@ -90,7 +90,7 @@ ORDER BY
 	return queryResult, nil
 }
 
-func (m *SqlMigrationsRepo) SaveMigrationStatus(migration db_migrations.MigrationEntity) error {
+func (m *SqlMigrationsRepo) SaveMigrationStatus(migration migrations.MigrationEntity) error {
 	globalDb := m.database.Connect()
 
 	migration.ID = uuid.NewString()
@@ -99,7 +99,7 @@ func (m *SqlMigrationsRepo) SaveMigrationStatus(migration db_migrations.Migratio
 
 	_, err := globalDb.QueryContext(`
 INSERT INTO
-`+db_migrations.MIGRATION_TABLE_NAME+`(id, executed_on, name, status)
+`+migrations.MIGRATION_TABLE_NAME+`(id, executed_on, name, status)
 VALUES(?, ?, ?, ?)
 `,
 		migration.ID,
