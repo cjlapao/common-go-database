@@ -5,6 +5,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/cjlapao/common-go-database/helpers"
 	"github.com/cjlapao/common-go/guard"
 	"github.com/cjlapao/common-go/log"
 	"github.com/elliotchance/orderedmap/v2"
@@ -45,7 +46,7 @@ func NewMigrationService(repo MigrationsRepository) *SqlMigrationService {
 
 func (m *SqlMigrationService) WasApplied(name string) bool {
 	for _, migration := range m.AppliedMigrations {
-		if strings.EqualFold(name, migration.Name) {
+		if strings.EqualFold(helpers.NormalizeName(name), helpers.NormalizeName(migration.Name)) {
 			m.logger.Info("Migration %v was already applied on %v", migration.Name, migration.ExecutedOn.Format(time.RFC3339))
 			return true
 		}

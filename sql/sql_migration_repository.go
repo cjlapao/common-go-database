@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/cjlapao/common-go-database/helpers"
 	"github.com/cjlapao/common-go-database/migrations"
 	"github.com/cjlapao/common-go/log"
 	"github.com/google/uuid"
@@ -104,7 +105,7 @@ VALUES(?, ?, ?, ?)
 `,
 		migration.ID,
 		migration.ExecutedOn,
-		migration.Name,
+		helpers.NormalizeName(migration.Name),
 		migration.Status,
 	)
 
