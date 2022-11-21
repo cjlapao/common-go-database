@@ -5,6 +5,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/cjlapao/common-go-database/helpers"
 	"github.com/cjlapao/common-go/guard"
 	"github.com/cjlapao/common-go/log"
 	"github.com/elliotchance/orderedmap/v2"
@@ -45,7 +46,7 @@ func NewMigrationService(repo MigrationsRepository) *SqlMigrationService {
 
 func (m *SqlMigrationService) WasApplied(name string) bool {
 	for _, migration := range m.AppliedMigrations {
-		if strings.EqualFold(name, migration.Name) {
+		if strings.EqualFold(helpers.NormalizeName(name), helpers.NormalizeName(migration.Name)) {
 			m.logger.Info("Migration %v was already applied on %v", migration.Name, migration.ExecutedOn.Format(time.RFC3339))
 			return true
 		}
@@ -69,7 +70,7 @@ func (m *SqlMigrationService) Run() error {
 
 	for el := m.Migrations.Front(); el != nil; el = el.Next() {
 		migration := MigrationEntity{
-			Name:   el.Value.Name(),
+			Name:   strings.ReplaceAll(el.Value.Name(), " ", "_"),
 			Status: false,
 		}
 		if m.WasApplied(el.Value.Name()) {
@@ -81,6 +82,8 @@ func (m *SqlMigrationService) Run() error {
 			if !el.Value.Down() {
 				logger.Error("there was an error applying migration down for %v, database might be inconsistent", el.Value.Name())
 			}
+			// Stopping migrations as they need to be run in order
+			break
 		} else {
 			logger.Info("Migration %v was applied successfully", el.Value.Name())
 			migration.Status = true
