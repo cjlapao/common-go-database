@@ -2,6 +2,7 @@ package migrations
 
 import (
 	"context"
+	"fmt"
 	"strings"
 	"time"
 
@@ -55,8 +56,15 @@ func (m *SqlMigrationService) WasApplied(name string) bool {
 	return false
 }
 
-func (m *SqlMigrationService) Register(migration Migration) {
-	m.Migrations.Set(migration.Order(), migration)
+func (m *SqlMigrationService) Register(migration Migration) error {
+	if existingMigration, exists := m.Migrations.Get(migration.Order()); exists {
+		return fmt.Errorf("migration %v with order %v already exists, %v was not registered", existingMigration.Name(), existingMigration.Order(), migration.Name())
+	}
+	if ok := m.Migrations.Set(migration.Order(), migration); !ok {
+		return fmt.Errorf("there was an error registering migration %v with order %v", migration.Name(), migration.Order())
+	}
+
+	return nil
 }
 
 func (m *SqlMigrationService) Run() error {
