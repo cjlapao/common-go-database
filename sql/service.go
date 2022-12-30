@@ -124,7 +124,11 @@ func (service *SqlService) GlobalDatabase() *SqlFactory {
 // returns a SqlFactory pointer
 func (service *SqlService) TenantDatabase() *SqlFactory {
 	ctx := execution_context.Get()
-	tenantId := ctx.Authorization.TenantId
+	tenantId := ""
+	if ctx.Authorization != nil {
+		tenantId = ctx.Authorization.TenantId
+	}
+
 	if tenantId == "" || strings.ToLower(tenantId) == "global" {
 		return service.GlobalDatabase()
 	}
