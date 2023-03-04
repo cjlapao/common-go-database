@@ -7,8 +7,8 @@ import (
 
 	_ "github.com/go-sql-driver/mysql"
 
+	log "github.com/cjlapao/common-go-logger"
 	"github.com/cjlapao/common-go/execution_context"
-	"github.com/cjlapao/common-go/log"
 )
 
 type sqlDatabase struct {
@@ -47,7 +47,7 @@ type SqlFactory struct {
 	Database        *sqlDatabase
 	Timeout         time.Duration
 	DatabaseContext *SqlDatabaseContext
-	Logger          *log.Logger
+	Logger          *log.LoggerService
 }
 
 func NewFactory(connectionString string) *SqlFactory {

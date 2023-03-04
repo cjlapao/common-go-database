@@ -6,13 +6,13 @@ import (
 
 	"github.com/cjlapao/common-go-database/helpers"
 	"github.com/cjlapao/common-go-database/migrations"
-	"github.com/cjlapao/common-go/log"
+	log "github.com/cjlapao/common-go-logger"
 	"github.com/google/uuid"
 )
 
 type SqlMigrationsRepo struct {
 	context  context.Context
-	logger   *log.Logger
+	logger   *log.LoggerService
 	database *SqlFactory
 }
 

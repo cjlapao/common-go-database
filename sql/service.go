@@ -3,9 +3,9 @@ package sql
 import (
 	"strings"
 
+	log "github.com/cjlapao/common-go-logger"
 	"github.com/cjlapao/common-go/execution_context"
 	"github.com/cjlapao/common-go/guard"
-	"github.com/cjlapao/common-go/log"
 )
 
 // Global Sql service to keep single service for consumers
@@ -28,7 +28,7 @@ type SqlService struct {
 	ConnectionString   string
 	GlobalDatabaseName string
 	TenantDatabaseName string
-	logger             *log.Logger
+	logger             *log.LoggerService
 }
 
 // New Creates a Sql service using the default configuration

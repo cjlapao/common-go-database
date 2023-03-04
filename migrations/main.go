@@ -7,8 +7,8 @@ import (
 	"time"
 
 	"github.com/cjlapao/common-go-database/helpers"
+	log "github.com/cjlapao/common-go-logger"
 	"github.com/cjlapao/common-go/guard"
-	"github.com/cjlapao/common-go/log"
 	"github.com/elliotchance/orderedmap/v2"
 )
 
@@ -18,7 +18,7 @@ const (
 
 type SqlMigrationService struct {
 	Context           context.Context
-	logger            *log.Logger
+	logger            *log.LoggerService
 	Migrations        *orderedmap.OrderedMap[int, Migration]
 	AppliedMigrations []MigrationEntity
 	Repository        MigrationsRepository

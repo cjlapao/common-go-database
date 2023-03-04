@@ -6,8 +6,8 @@ import (
 	"reflect"
 	"time"
 
+	log "github.com/cjlapao/common-go-logger"
 	"github.com/cjlapao/common-go/execution_context"
-	"github.com/cjlapao/common-go/log"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
@@ -178,7 +178,7 @@ type MongoFactory struct {
 	Client          *mongoClient
 	Database        *mongoDatabase
 	DatabaseContext *MongoDatabaseContext
-	Logger          *log.Logger
+	Logger          *log.LoggerService
 }
 
 // NewFactory Creates a brand new factory for a specific connection string
