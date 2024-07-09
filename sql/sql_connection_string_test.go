@@ -15,6 +15,7 @@ func TestSqlConnectionString_Parse(t *testing.T) {
 		database string
 		user     string
 		password string
+		tls      bool
 	}
 	tests := []struct {
 		name    string
@@ -35,11 +36,12 @@ func TestSqlConnectionString_Parse(t *testing.T) {
 				password: "test",
 				server:   "127.0.0.1",
 				port:     0,
+				tls:      false,
 			},
 			wantErr: false,
 		},
 		{
-			name: "without database",
+			name: "without database and with port",
 			c:    &SqlConnectionString{},
 			args: args{
 				connectionString: "admin:test@tcp(127.0.0.1:20)",
@@ -50,11 +52,12 @@ func TestSqlConnectionString_Parse(t *testing.T) {
 				password: "test",
 				server:   "127.0.0.1",
 				port:     20,
+				tls:      false,
 			},
 			wantErr: false,
 		},
 		{
-			name: "without database",
+			name: "with database and port",
 			c:    &SqlConnectionString{},
 			args: args{
 				connectionString: "admin:test@tcp(127.0.0.1:20)/test",
@@ -65,11 +68,60 @@ func TestSqlConnectionString_Parse(t *testing.T) {
 				password: "test",
 				server:   "127.0.0.1",
 				port:     20,
+				tls:      false,
 			},
 			wantErr: false,
 		},
 		{
-			name: "without database",
+			name: "with database and tls",
+			c:    &SqlConnectionString{},
+			args: args{
+				connectionString: "admin:test@tcp(127.0.0.1)/test?tls=true",
+			},
+			expect: expect{
+				database: "test",
+				user:     "admin",
+				password: "test",
+				server:   "127.0.0.1",
+				port:     0,
+				tls:      true,
+			},
+			wantErr: false,
+		},
+		{
+			name: "with database and tls false",
+			c:    &SqlConnectionString{},
+			args: args{
+				connectionString: "admin:test@tcp(127.0.0.1)/test?tls=false",
+			},
+			expect: expect{
+				database: "test",
+				user:     "admin",
+				password: "test",
+				server:   "127.0.0.1",
+				port:     0,
+				tls:      false,
+			},
+			wantErr: false,
+		},
+		{
+			name: "with database and wrong parameter",
+			c:    &SqlConnectionString{},
+			args: args{
+				connectionString: "admin:test@tcp(127.0.0.1)/test?something=false",
+			},
+			expect: expect{
+				database: "test",
+				user:     "admin",
+				password: "test",
+				server:   "127.0.0.1",
+				port:     0,
+				tls:      false,
+			},
+			wantErr: false,
+		},
+		{
+			name: "with database and no port",
 			c:    &SqlConnectionString{},
 			args: args{
 				connectionString: "admin:test@tcp(127.0.0.1)/test",
@@ -122,6 +174,9 @@ func TestSqlConnectionString_Parse(t *testing.T) {
 				}
 				if tt.expect.password != tt.c.Password {
 					t.Errorf("expected password to be %v found %v", tt.expect.password, tt.c.Password)
+				}
+				if tt.expect.tls != tt.c.EnableTLS {
+					t.Errorf("expected tls to be %v found %v", tt.expect.tls, tt.c.EnableTLS)
 				}
 			}
 		})

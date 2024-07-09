@@ -9,18 +9,24 @@ import (
 )
 
 type SqlConnectionString struct {
-	Username string
-	Password string
-	Port     int
-	Server   string
-	Database string
+	Username  string
+	Password  string
+	Port      int
+	Server    string
+	Database  string
+	EnableTLS bool
 }
 
 func (c *SqlConnectionString) ConnectionString() string {
 	if c.Port > 0 {
 		c.Server = c.Server + ":" + strconv.Itoa(c.Port)
 	}
-	return c.Username + ":" + c.Password + "@tcp(" + c.Server + ")/" + c.Database + "?parseTime=true"
+	result := c.Username + ":" + c.Password + "@tcp(" + c.Server + ")/" + c.Database + "?parseTime=true"
+	if c.EnableTLS {
+		result += "&tls=true"
+	}
+
+	return result
 }
 
 func (c *SqlConnectionString) WithUser(username string) *SqlConnectionString {
@@ -88,9 +94,26 @@ func (c *SqlConnectionString) Parse(connectionString string) error {
 	c.Username = strings.TrimSpace(userParts[0])
 	c.Password = strings.TrimSpace(userParts[1])
 
-	serverDatabaseParts := strings.Split(userServerParts[1], "/")
+	urlPart := ""
+	databasePart := ""
+	parametersPart := ""
+	if strings.Contains(userServerParts[1], "?") {
+		parametersPart = strings.Split(userServerParts[1], "?")[1]
+		urlPart = strings.Split(userServerParts[1], "?")[0]
+	}
 
-	server := serverDatabaseParts[0]
+	if urlPart == "" {
+		urlPart = userServerParts[1]
+	}
+	if strings.Contains(urlPart, "/") {
+		databasePart = strings.Split(urlPart, "/")[1]
+		urlPart = strings.Split(urlPart, "/")[0]
+	}
+	if urlPart == "" {
+		urlPart = userServerParts[1]
+	}
+
+	server := urlPart
 	server = strings.ReplaceAll(server, "tcp(", "")
 	server = strings.ReplaceAll(server, ")", "")
 	serverParts := strings.Split(server, ":")
@@ -103,8 +126,16 @@ func (c *SqlConnectionString) Parse(connectionString string) error {
 		}
 	}
 
-	if len(serverDatabaseParts) == 2 {
-		c.Database = serverDatabaseParts[1]
+	if databasePart != "" {
+		c.Database = databasePart
+	}
+	if parametersPart != "" {
+		parameters := strings.Split(parametersPart, "&")
+		for _, parameter := range parameters {
+			if parameter == "tls=true" {
+				c.EnableTLS = true
+			}
+		}
 	}
 
 	return nil
